@@ -1,5 +1,5 @@
 import './style.css';
-import { compareAsc, format } from 'date-fns';
+import { compareAsc, isSameWeek, format } from 'date-fns';
 
 const ToDoList = (() => {
     let uniqueId = 0;
@@ -267,7 +267,7 @@ const DOMController = (() => {
                 case 'today':
                     toggleAddTask('none');
                     break;
-                case 'next week':
+                case 'this week':
                     toggleAddTask('none');
                     break;
                 case 'no date':
@@ -351,7 +351,28 @@ const DOMController = (() => {
         };
     };
 
-    return { search, addTask, displayItems, clearTaskDisplay, getFolders, createFolder };
+    const dateSpecificTasks = () => {
+        loadTodayTasks();
+        loadWeekTasks();
+        loadDatelessTasks();
+
+        function loadTodayTasks() {
+            const todayFolder = document.querySelector('.today');
+            todayFolder.addEventListener('click', () => AppController.loadTodayTasks());
+        };
+
+        function loadWeekTasks() {
+            const weekFolder = document.querySelector('.this-week');
+            weekFolder.addEventListener('click', () => AppController.loadWeekTasks());
+        };
+
+        function loadDatelessTasks() {
+            const datelessFolder = document.querySelector('.no-date');
+            datelessFolder.addEventListener('click', () => AppController.loadDatelessTasks());
+        };
+    };
+
+    return { search, addTask, displayItems, clearTaskDisplay, getFolders, createFolder, dateSpecificTasks };
 })();
 
 const AppController = (() => {
@@ -371,7 +392,6 @@ const AppController = (() => {
         ToDoList.getItem(ToDoList.uniqueId, currentFolder, item.title, item.description, dueDate, item.priority, item.notes);
         updateDOMList();
         ToDoList.uniqueId++;
-        console.log(ToDoList.folders);
     };
 
     const removeItemFromList = el => {
@@ -416,15 +436,75 @@ const AppController = (() => {
         }
     };
 
+    const loadTodayTasks = () => {
+        DOMController.clearTaskDisplay();
+        const arr = [];
+        const date = new Date();
+        const today = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+        for (let folder in ToDoList.folders) {
+            if (folder !== 'completed') {
+                for (let item of ToDoList.folders[folder]) {
+                    if (item.dueDate !== '') {
+                        const dueDate = `${item.dueDate.getMonth() + 1}/${item.dueDate.getDate()}/${item.dueDate.getFullYear()}`;
+                        if (dueDate === today) {
+                            arr.push(item);
+                        };
+                    }
+                }
+            }
+        }
+        for (let item of arr) {
+            DOMController.displayItems(item);
+        }
+    };
+
+    const loadWeekTasks = () => {
+        DOMController.clearTaskDisplay();
+        const arr = [];
+        const date = new Date();
+        for (let folder in ToDoList.folders) {
+            if (folder !== 'completed') {
+                for (let item of ToDoList.folders[folder]) {
+                    if (item.dueDate !== '') {
+                        if (isSameWeek(date, item.dueDate)) {
+                            arr.push(item);
+                        };
+                    }
+                }
+            }
+        }
+        for (let item of arr) {
+            DOMController.displayItems(item);
+        }
+    };
+
+    const loadDatelessTasks = () => {
+        DOMController.clearTaskDisplay();
+        const arr = [];
+        for (let folder in ToDoList.folders) {
+            if (folder !== 'completed') {
+                for (let item of ToDoList.folders[folder]) {
+                    if (item.dueDate === '') {
+                        arr.push(item);
+                    };
+                }
+            }
+        }
+        for (let item of arr) {
+            DOMController.displayItems(item);
+        }
+    };
+
     const runApp = () => {
         DOMController.search();
         DOMController.addTask();
         DOMController.getFolders();
         DOMController.createFolder();
+        DOMController.dateSpecificTasks();
     };
 
     return { currentFolder, placeItemInList, moveItemToCompleted, removeItemFromList,
-                    populateTaskDisplay, addFolder, querySearch, runApp };
+                    populateTaskDisplay, addFolder, querySearch, loadTodayTasks, loadWeekTasks, loadDatelessTasks, runApp };
 })();
 
 
