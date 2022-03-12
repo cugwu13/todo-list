@@ -1,0 +1,316 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    --default-font-family: 'Overpass', 'sans-serif';
+    --red-theme-color: rgb(240, 98, 98);
+    --gray-theme-color: rgb(99, 99, 99);
+}
+
+body {
+    font-family: var(--default-font-family);
+    height: 100vh;
+}
+
+button, input, textarea, select {
+    font-family: var(--default-font-family);
+}
+
+button {
+    border: none;
+    border-radius: 4px;
+}
+
+button:hover {
+    cursor: pointer;
+    filter: brightness(80%);
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+textarea {
+    resize: none;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 1fr 6fr;
+    grid-template-rows: 1fr 8fr;
+    height: 100%;
+}
+
+.sidebar {
+    background-color: rgb(245, 245, 245);
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    grid-area: 1 / 1 / 3 / 2;
+    padding: 10px 14px;
+}
+
+.sidebar a {
+    font-size: 1.2rem;
+    transition: .2s;
+}
+
+.sidebar a:hover {
+    transform: scale(.95);
+    cursor: pointer;
+}
+
+.logo {
+    align-self: start;
+    justify-self: start;
+    background-color: var(--red-theme-color);
+    color: white;
+    border-radius: 50%;
+    padding: 20px 14px;
+    margin-bottom: 20px;
+}
+
+.active-folder {
+    color: var(--red-theme-color);
+    font-weight: 700;
+}
+
+.primary-folders, .secondary-folders {
+    display: grid;
+    grid-template-rows: min-content;
+    grid-auto-rows: min-content;
+    gap: 20px;
+}
+
+.primary-folders {
+    flex: 1 1 0;
+}
+
+.secondary-folders {
+    flex: 1 0 auto;
+}
+
+#create-folder {
+    color: var(--gray-theme-color);
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: flex;
+    align-self: start;
+    justify-self: start;
+    gap: 10px;
+    transition: .2s;
+}
+
+#create-folder:hover, #add-task:hover {
+    cursor: pointer;
+    filter: brightness(.5);
+    transform: scale(1.05);
+}
+
+.folder-input {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 4px;
+}
+
+.folder-input > input {
+    grid-column: 1 / 3;
+}
+
+.folder-input > button {
+    color: white;
+    justify-self: center;
+    align-self: center;
+    font-weight: bold;
+    padding: 4px 8px;
+}
+
+.folder-input > button:nth-child(2) {
+    background-color: green;
+}
+
+.folder-input > button:nth-child(3) {
+    background-color: red;
+}
+
+.header {
+    background-color: var(--red-theme-color);
+    box-shadow: 0 4px 4px lightgray;
+    grid-area: 1 / 2 / 2 / 3;
+    display: grid;
+    grid-template-columns: 2fr 3fr 2fr;
+}
+
+.header > div {
+    grid-column: 2 / 3;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header i {
+    color: white;
+    font-size: 22px;
+    height: auto;
+}
+
+.header input {
+    flex: 1;
+    color: white;
+    background-color: var(--red-theme-color);
+    border: 1px solid lightgray;
+    border-radius: 10px;
+    font-size: 1rem;
+    padding: 6px;
+}
+
+.header input:focus-visible {
+    outline: none;
+    border: 2px solid lightgray;
+}
+
+.main {
+    grid-area: 2 / 2 / 3 / 3;
+    display: grid;
+    grid-template-rows: min-content;
+    grid-auto-rows: min-content;
+    padding: 20px;
+    position: relative;
+}
+
+#add-task {
+    justify-self: start;
+    color: var(--gray-theme-color);
+    display: flex;
+    font-size: 1.6rem;
+    font-weight: 700;
+    gap: 10px;
+    padding: 6px;
+    margin-bottom: 16px;
+    transition: .2s ease-in;
+}
+
+.todo-task {
+    border-top: 2px solid lightgray;
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+}
+
+.fa-circle {
+    font-size: 24px;
+}
+
+.check-task {
+    position: relative;
+    border: 2px solid black;
+    border-radius: 50%;
+    color: white;
+    justify-self: start;
+    transition: .1s ease-in;
+}
+
+.fa-check {
+    color: green;
+    font-size: 20px;
+}
+
+.check-mark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.fa-circle:hover { 
+    color: lightgray;
+    cursor: pointer;
+}
+
+.fa-trash-can {
+    font-size: 20px;
+    transition: .1s ease-in;
+}
+
+.fa-trash-can:hover {
+    color: red;
+    cursor: pointer;
+}
+
+.backdrop {
+    position: fixed;
+    top: 0%;
+    left: 0%;
+    z-index: 999;
+    height: 100%;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    display: none;
+}
+
+.backdrop-transparent {
+    position: fixed;
+    top: 0%;
+    left: 0%;
+    z-index: 999;
+    height: 100%;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.0);
+}
+
+.todo-popup {
+    background-color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 20px 30px;
+    display: grid;
+    gap: 14px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+
+.todo-popup > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.todo-popup input, .todo-popup textarea, .todo-popup select, .secondary-folders input {
+    border: 1px solid lightgray;
+    border-radius: 6px;
+    font-size: .8rem;
+    padding: 6px;
+}
+
+.todo-popup label, .cancel-btn {
+    color: var(--gray-theme-color);
+}
+
+.cancel-btn {
+    justify-self: end;
+    font-size: 20px;
+    transition: .2s ease-in;
+}
+
+.cancel-btn:hover {
+    cursor: pointer;
+    color: red;
+    transform: rotate(90deg) scale(1.1);
+}
+
+.confirm-add-task {
+    background-color: var(--red-theme-color);
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 6px 14px;
+    transition: .2s;
+}
