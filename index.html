@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Todo List</title>
+        <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    </head>
+    <body>
+        <div class="content">
+            <div class="sidebar">
+                <div class="logo">
+                    <h2>ToDo</h2>
+                </div>
+                <div class="primary-folders">
+                    <a class="folder active-folder">General</a>
+                    <a class="folder">Today</a>
+                    <a class="folder">Next Week</a>
+                    <a class="folder">No Date</a>
+                </div>
+                <div class="secondary-folders">
+                    <div id="create-folder">
+                        <i class="fa-solid fa-folder-plus"></i>
+                        <p>Create Folder</p>
+                    </div>
+                    <!-- <a class="folder">Folder 1</a>
+                    <a class="folder">Folder 2</a>
+                    <a class="folder">Folder 3</a> -->
+                </div>
+                <a class="folder">Completed</a>
+            </div>
+            <div class="header">
+                <div>
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="search" name="search">
+                </div>
+            </div>
+            <div class="main">
+                <div id="add-task">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    <p>Add Task</p>
+                </div>
+            </div>
+        </div>
+        <script src="main.js"></script>
+    </body>
+</html>
