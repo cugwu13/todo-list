@@ -1,5 +1,5 @@
 import './style.css';
-import { compareAsc, isSameWeek, format } from 'date-fns';
+import { compareAsc, isSameWeek, format, parse } from 'date-fns';
 
 const ToDoList = (() => {
     let uniqueId = 0;
@@ -11,13 +11,14 @@ const ToDoList = (() => {
         return item;
     };
 
-    const folders = {
+    let folders = {
         general: [],
         completed: [],
     };
     
     function ToDo(uniqueId, folder, title, description, dueDate, priority, notes) {
         this.id = uniqueId;
+        this.folder = folder;
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
@@ -93,6 +94,7 @@ const DOMController = (() => {
             const div = document.createElement('div');
             const label = document.createElement('label');
             const el = document.createElement(elementType);
+            if (idName === 'title') el.setAttribute('autofocus', 'autofocus');
             el.id = el.name = idName;
             if (cols && rows) {
                 el.setAttribute('cols', cols);
@@ -176,13 +178,16 @@ const DOMController = (() => {
             return backdrop;
         };
 
-        // TODO: Clean this up!!!
-        const addTask = document.querySelector('#add-task');
-        addTask.addEventListener('click', () => {
-            document.querySelector('.main').appendChild(createToDoField());
-            const backdrop = document.querySelector('.backdrop');
-            fadeIn(backdrop);
-        });
+        const addTaskEL = () => {
+            const addTask = document.querySelector('#add-task');
+            addTask.addEventListener('click', () => {
+                document.querySelector('.main').appendChild(createToDoField());
+                const backdrop = document.querySelector('.backdrop');
+                fadeIn(backdrop);
+            });
+        }
+
+        addTaskEL();
     };
 
     const displayItems = (item, completed=false) => {
@@ -194,6 +199,7 @@ const DOMController = (() => {
             const dueDate = document.createElement('p');
             const priority = document.createElement('p');
             const notes = document.createElement('p');
+            const folder = document.createElement('p');
             const deleteItem = document.createElement('i');
 
             checkBox.classList.add('fa-solid', 'fa-circle', 'check-task');
@@ -203,6 +209,7 @@ const DOMController = (() => {
             dueDate.innerText = item.dueDate === '' ? '' : format(item.dueDate, 'MM/dd/yyyy');
             priority.innerText = item.priority == '' ? '' : item.priority[0].toUpperCase() + item.priority.slice(1);
             notes.innerText = item.notes;
+            folder.innerText = item.folder;
             deleteItem.classList.add('fa-solid', 'fa-trash-can');
             deleteBtnEL(deleteItem);
             div.classList.add('todo-task');
@@ -280,6 +287,14 @@ const DOMController = (() => {
         };
     };
 
+    const loadLocalFolders = () => {
+        const localFolders = AppController.localFolders();
+        for (let folder of localFolders) {
+            const folderName = folder[0].toUpperCase() + folder.slice(1);
+            folderToDOM(folderName);
+        }
+    };
+
     const getFolders = () => {
         const folders = document.querySelectorAll('.folder');
         folders.forEach(folder => folderEL(folder));
@@ -294,6 +309,15 @@ const DOMController = (() => {
                 folder.classList.remove('active-folder');
             }
         });
+    };
+
+    const folderToDOM = (folderName) => {
+        const createBTn = document.querySelector('#create-folder');
+        const folder = document.createElement('a');
+        folder.classList.add('folder');
+        folder.innerText = folderName;
+        folderEL(folder);
+        insertAfter(folder, createBTn);
     };
 
     const createFolder = () => {
@@ -319,14 +343,6 @@ const DOMController = (() => {
             div.append(input, confirm, cancel);
 
             return div;
-        };
-
-        const folderToDOM = (folderName) => {
-            const folder = document.createElement('a');
-            folder.classList.add('folder');
-            folder.innerText = folderName;
-            folderEL(folder);
-            insertAfter(folder, createBTn);
         };
 
         const confirmEL = () => {
@@ -372,7 +388,7 @@ const DOMController = (() => {
         };
     };
 
-    return { search, addTask, displayItems, clearTaskDisplay, getFolders, createFolder, dateSpecificTasks };
+    return { search, addTask, displayItems, clearTaskDisplay, loadLocalFolders, getFolders, createFolder, dateSpecificTasks };
 })();
 
 const AppController = (() => {
@@ -392,18 +408,22 @@ const AppController = (() => {
         ToDoList.getItem(ToDoList.uniqueId, currentFolder, item.title, item.description, dueDate, item.priority, item.notes);
         updateDOMList();
         ToDoList.uniqueId++;
+        populateStorage();
     };
 
     const removeItemFromList = el => {
         const elId = parseInt(el.dataset.id);
         const index = ToDoList.folders[currentFolder].map(item => item.id).indexOf(elId);
+        const removedItem = ToDoList.folders[currentFolder].splice(index, 1)[0];
+        populateStorage();
         
-        return ToDoList.folders[currentFolder].splice(index, 1)[0];
+        return removedItem;
     };
 
     const moveItemToCompleted = el => {
         const item = removeItemFromList(el);
         ToDoList.getItem(item.id, 'completed', item.title, item.description, item.dueDate, item.priority, item.notes);
+        populateStorage();
     };
 
     const updateDOMList = () => {
@@ -421,6 +441,7 @@ const AppController = (() => {
 
     const addFolder = folderName => {
         ToDoList.folders[folderName] = [];
+        populateStorage();
     };
 
     const querySearch = query => {
@@ -456,6 +477,17 @@ const AppController = (() => {
         for (let item of arr) {
             DOMController.displayItems(item);
         }
+    };
+
+    const localFolders = () => {
+        const folders = [];
+        for (let folder in ToDoList.folders) {
+            if (folder !== 'general' && folder !== 'completed') {
+                folders.push(folder);
+            }
+        }
+
+        return folders;
     };
 
     const loadWeekTasks = () => {
@@ -495,7 +527,41 @@ const AppController = (() => {
         }
     };
 
+    const parseLocalStorage = data => {
+        const stringToDate = dueDate => {
+            return dueDate === '' ? '' : new Date(dueDate);
+        }
+
+        const newData = JSON.parse(data);
+        for (let folder in newData) {
+            for (let item of newData[folder]) {
+                item.dueDate = stringToDate(item.dueDate);
+            }
+        }
+
+        return newData;
+    };
+
+    const loadLocalStorage = () => {
+        if (localStorage.getItem('userData')) {
+            const rawUserData = localStorage.getItem('userData');
+            const parsedUserData = parseLocalStorage(rawUserData);
+
+            for (let folder in parsedUserData) {
+                ToDoList.folders[folder] = parsedUserData[folder];
+            }
+        }
+    };
+
+    const populateStorage = () => {
+        localStorage.setItem('userData', JSON.stringify(ToDoList.folders));
+    };
+
     const runApp = () => {
+        loadLocalStorage();
+        populateTaskDisplay('general');
+        // some function to add created folders to sidebar and run EL on them
+        DOMController.loadLocalFolders();
         DOMController.search();
         DOMController.addTask();
         DOMController.getFolders();
@@ -504,7 +570,8 @@ const AppController = (() => {
     };
 
     return { currentFolder, placeItemInList, moveItemToCompleted, removeItemFromList,
-                    populateTaskDisplay, addFolder, querySearch, loadTodayTasks, loadWeekTasks, loadDatelessTasks, runApp };
+                    populateTaskDisplay, addFolder, querySearch, loadTodayTasks, loadWeekTasks,
+                    localFolders, loadDatelessTasks, runApp };
 })();
 
 
