@@ -36,10 +36,12 @@ textarea {
 }
 
 .content {
-    display: grid;
-    grid-template-columns: 1fr 6fr;
-    grid-template-rows: minmax(80px, 1fr) 8fr;
+    display: flex;
     height: 100%;
+}
+
+.sidebar, .right-content {
+    transition: .5s;
 }
 
 .sidebar {
@@ -47,9 +49,11 @@ textarea {
     display: flex;
     flex-direction: column;
     gap: 40px;
-    grid-area: 1 / 1 / 3 / 2;
+    flex: 0 0 12rem;
     padding: 10px 14px;
     overflow-y: auto;
+    overflow-x: hidden;
+    transition: .5s ease;
 }
 
 .sidebar a {
@@ -62,6 +66,11 @@ textarea {
     cursor: pointer;
 }
 
+.sidebar-top {
+    display: flex;
+    justify-content: space-between;
+}
+
 .logo {
     align-self: start;
     justify-self: start;
@@ -70,6 +79,11 @@ textarea {
     border-radius: 50%;
     padding: 20px 14px;
     margin-bottom: 20px;
+}
+
+#close-sidebar {
+    align-self: start;
+    cursor: pointer;
 }
 
 .active-folder {
@@ -82,6 +96,7 @@ textarea {
     grid-template-rows: min-content;
     grid-auto-rows: min-content;
     gap: 20px;
+    justify-items: start;
 }
 
 .primary-folders {
@@ -136,12 +151,24 @@ textarea {
     background-color: red;
 }
 
+.right-content {
+    flex: 1;
+    display: grid;
+    grid-template-rows: minmax(80px, 1fr) 8fr;
+    overflow-x: hidden;
+}
+
 .header {
     background-color: var(--red-theme-color);
     box-shadow: 0 4px 4px lightgray;
-    grid-area: 1 / 2 / 2 / 3;
     display: grid;
     grid-template-columns: 2fr 3fr 2fr;
+    width: 100%;
+}
+
+.fa-bars {
+    align-self: center;
+    margin: 1.6rem;
 }
 
 .header > div {
@@ -174,12 +201,13 @@ textarea {
 }
 
 .main {
-    grid-area: 2 / 2 / 3 / 3;
     display: grid;
     grid-template-rows: min-content;
     grid-auto-rows: min-content;
     padding: 20px;
     position: relative;
+    gap: 14px;
+    width: 100%;
 }
 
 #add-task {
@@ -195,6 +223,12 @@ textarea {
 }
 
 .todo-task {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.primary-details {
     border-top: 2px solid lightgray;
     display: grid;
     grid-auto-columns: 1fr;
@@ -204,8 +238,32 @@ textarea {
     padding: 10px;
 }
 
-.fa-circle {
+.secondary-details {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.secondary-details > div:first-child {
+    justify-items: center;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    padding: 0 3rem;
+}
+
+.secondary-details > *:last-child {
+    align-self: center;
+}
+
+.fa-circle, .fa-circle-down, .fa-circle-up, .fa-xmark, .fa-bars {
     font-size: 24px;
+    transition: .2s ease-in;
+}
+
+.fa-circle-down:hover, .fa-circle-up:hover, .fa-bars:hover {
+    cursor: pointer;
+    font-size: 26px;
 }
 
 .check-task {

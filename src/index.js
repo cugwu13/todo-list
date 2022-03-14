@@ -89,6 +89,38 @@ const DOMController = (() => {
         };
     };
 
+    const showSidebar = () => {
+        const menuEL = btn => {
+            btn.addEventListener('click', () => {
+                flexSidebar();
+            });
+        };
+
+        const flexSidebar = () => {
+            const sidebar = document.querySelector('.sidebar');
+            const paddingLeft = '14px';
+            sidebar.style.cssText = `margin-left: 0`;
+        };
+
+        const menu = document.querySelector('.fa-bars');
+        menuEL(menu);
+    };
+
+    const hideSidebar = () => {
+        const hideEL = btn => {
+            btn.addEventListener('click', () => {
+                shrinkSidebar();
+            });
+        };
+        const shrinkSidebar = () => {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.style.cssText = 'margin-left: -12rem;';
+        };
+
+        const hideBtn = document.querySelector('#close-sidebar');
+        hideEL(hideBtn);
+    };
+
     const addTask = () => {
         const createInputDiv = (elementType, idName, labelName, cols=null, rows=null, type=null) => {
             const div = document.createElement('div');
@@ -190,8 +222,63 @@ const DOMController = (() => {
         addTaskEL();
     };
 
+    const showDetails = item => {
+        const dropDownEL = el => {
+            const showSecondaryDetails = () => {
+                const container = document.createElement('div');
+                const description = document.createElement('p');
+                const descriptionLabel = document.createElement('b');
+                const priority = document.createElement('p');
+                const priorityLabel = document.createElement('b');
+                const notes = document.createElement('p');
+                const notesLabel = document.createElement('b');
+
+                descriptionLabel.innerText = 'Description: ';
+                priorityLabel.innerText = 'Priority: ';
+                notesLabel.innerText = 'Notes: ';
+                description.append(descriptionLabel, item.description);
+                priority.append(priorityLabel, item.priority === '' ? '' : item.priority[0].toUpperCase() + item.priority.slice(1));
+                notes.append(notesLabel, item.notes);
+                container.append(description, priority, notes);
+
+                return container;
+            };
+            el.addEventListener('click', () => {
+                el.parentElement.insertBefore(showSecondaryDetails(), el);
+                hideDetails(el, item);
+            });
+        }
+        const div = document.createElement('div');
+        const dropDown = document.createElement('i');
+
+        dropDownEL(dropDown);
+        dropDown.classList.add('fa-solid', 'fa-circle-down');
+        div.classList.add('secondary-details');
+        div.appendChild(dropDown);
+
+        return div;
+    };
+
+    const hideDetails = (el, item) => {
+        const collapseEL = el => {
+            el.addEventListener('click', () => {
+                const details = el.previousSibling;
+                const grandParent = details.parentElement.parentElement;
+
+                grandParent.removeChild(details.parentElement);
+                grandParent.appendChild(showDetails(item));
+            });
+        };
+        const collapse = document.createElement('i');
+        collapse.classList.add('fa-solid', 'fa-circle-up');
+        el.parentElement.appendChild(collapse);
+        collapseEL(collapse);
+        el.parentElement.removeChild(el);
+    };
+
     const displayItems = (item, completed=false) => {
         const itemRow = (item) => {
+            const container = document.createElement('div');
             const div = document.createElement('div');
             const checkBox = document.createElement('i');
             const title = document.createElement('p');
@@ -207,19 +294,20 @@ const DOMController = (() => {
             title.innerText = item.title;
             description.innerText = item.description;
             dueDate.innerText = item.dueDate === '' ? '' : format(item.dueDate, 'MM/dd/yyyy');
-            priority.innerText = item.priority == '' ? '' : item.priority[0].toUpperCase() + item.priority.slice(1);
+            priority.innerText = item.priority === '' ? '' : item.priority[0].toUpperCase() + item.priority.slice(1);
             notes.innerText = item.notes;
             folder.innerText = item.folder;
             deleteItem.classList.add('fa-solid', 'fa-trash-can');
             deleteBtnEL(deleteItem);
-            div.classList.add('todo-task');
+            container.classList.add('todo-task');
+            div.classList.add('primary-details');
             div.dataset.id = item.id;
-            completed === false ? div.append(checkBox, title, description, dueDate, priority, notes, deleteItem) :
-                    div.append(title, description, notes);
+            completed === false ? div.append(checkBox, title, dueDate, deleteItem) :
+                    div.append(title);
+            container.append(div, showDetails(item));
 
-            return div;
+            return container;
         };
-
         document.querySelector('.main').appendChild(itemRow(item));
     };
 
@@ -230,7 +318,7 @@ const DOMController = (() => {
             checkMark.classList.add('fa-solid', 'fa-check', 'check-mark');
             el.appendChild(checkMark);
             setTimeout(() => {
-                fadeOut(el.parentElement);
+                fadeOut(el.parentElement.parentElement);
                 document.body.style.cssText = 'pointer-events: all';
             }, 400);
             AppController.moveItemToCompleted(el.parentElement);
@@ -240,8 +328,8 @@ const DOMController = (() => {
     const deleteBtnEL = el => {
         el.addEventListener('click', () => {
             const parent = el.parentElement;
-            const grandParent = parent.parentElement;
-            grandParent.removeChild(parent);
+            const greatGrandParent = parent.parentElement.parentElement;
+            greatGrandParent.removeChild(parent.parentElement);
             AppController.removeItemFromList(parent);
         });
     };
@@ -388,7 +476,8 @@ const DOMController = (() => {
         };
     };
 
-    return { search, addTask, displayItems, clearTaskDisplay, loadLocalFolders, getFolders, createFolder, dateSpecificTasks };
+    return { showSidebar, hideSidebar, search, addTask, displayItems, clearTaskDisplay, loadLocalFolders, getFolders,
+            createFolder, dateSpecificTasks };
 })();
 
 const AppController = (() => {
@@ -560,13 +649,14 @@ const AppController = (() => {
     const runApp = () => {
         loadLocalStorage();
         populateTaskDisplay('general');
-        // some function to add created folders to sidebar and run EL on them
         DOMController.loadLocalFolders();
         DOMController.search();
         DOMController.addTask();
         DOMController.getFolders();
         DOMController.createFolder();
         DOMController.dateSpecificTasks();
+        DOMController.showSidebar();
+        DOMController.hideSidebar();
     };
 
     return { currentFolder, placeItemInList, moveItemToCompleted, removeItemFromList,
