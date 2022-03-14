@@ -11,8 +11,11 @@
     <body>
         <div class="content">
             <div class="sidebar">
-                <div class="logo">
-                    <h2>ToDo</h2>
+                <div class="sidebar-top">
+                    <div class="logo">
+                        <h2>ToDo</h2>
+                    </div>
+                    <i id="close-sidebar" class="fa-solid fa-xmark"></i>
                 </div>
                 <div class="primary-folders">
                     <a class="folder active-folder">General</a>
@@ -25,22 +28,22 @@
                         <i class="fa-solid fa-folder-plus"></i>
                         <p>Create Folder</p>
                     </div>
-                    <!-- <a class="folder">Folder 1</a>
-                    <a class="folder">Folder 2</a>
-                    <a class="folder">Folder 3</a> -->
                 </div>
                 <a class="folder">Completed</a>
             </div>
-            <div class="header">
-                <div>
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="search" name="search">
+            <div class="right-content">
+                <div class="header">
+                    <i class="fa-solid fa-bars"></i>
+                    <div>
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search" name="search">
+                    </div>
                 </div>
-            </div>
-            <div class="main">
-                <div id="add-task">
-                    <i class="fa-solid fa-calendar-plus"></i>
-                    <p>Add Task</p>
+                <div class="main">
+                    <div id="add-task">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                        <p>Add Task</p>
+                    </div>
                 </div>
             </div>
         </div>
