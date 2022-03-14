@@ -373,3 +373,10 @@ textarea {
     padding: 6px 14px;
     transition: .2s;
 }
+
+
+@media only screen and (max-width: 600px) {
+    .sidebar {
+        margin-left: -12rem;
+    }
+}
